@@ -1,1 +1,1 @@
-web: bin/index
+web: bin/m
