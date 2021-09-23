@@ -20,13 +20,16 @@ const (
 
 // DB set up
 func setupDB() *sql.DB {
-    dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
-    db, err := sql.Open("postgres", dbinfo)
+    // dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
+	dbURL := "postgres://iwggzgabufxdyc:b81c780e6921121c9d37cf23ef612ba2d276b81b7ae15de4019df264ab50dfa0@ec2-107-22-245-82.compute-1.amazonaws.com:5432/d7rc2qfknu4r74"
+    db, err := sql.Open("postgres", dbURL)
 
     checkErr(err)
 
     return db
 }
+
+
 type FuelPrice struct {
     Id int `json:"id"`
     Qty int `json:"qty"`
@@ -51,7 +54,7 @@ func main() {
     // Init the mux router
     router := mux.NewRouter()
 
-    // Get all movies
+    // Get all fuel prices
     router.HandleFunc("/fuel_prices/", GetFuelPrices).Methods("GET")
 
     // Create a FuelPrice
@@ -65,9 +68,6 @@ func main() {
 
     // Delete a specific FuelPrice by the FuelPriceID
     router.HandleFunc("/fuel_prices/{fuelpriceid}/", DeleteFuelPrice).Methods("DELETE")
-
-    // Delete all movies
-    // router.HandleFunc("/movies/", DeleteMovies).Methods("DELETE")
 
     // serve the app
     fmt.Println("Server at 8080")
@@ -93,7 +93,6 @@ func GetFuelPrices(w http.ResponseWriter, r *http.Request) {
 
     printMessage("Getting fuel prices...")
 
-    // Get all movies from movies table that don't have movieID = "1"
     rows, err := db.Query("SELECT * FROM fuel_prices")
 
     // check errors
@@ -102,7 +101,6 @@ func GetFuelPrices(w http.ResponseWriter, r *http.Request) {
     // var response []JsonResponse
     var fuel_prices []FuelPrice
 
-    // Foreach movie
     for rows.Next() {
         var id int
         var qty int
@@ -129,24 +127,33 @@ func CreateFuelPrice(w http.ResponseWriter, r *http.Request) {
     premium_price := r.FormValue("premium_price")
     pertalite_price := r.FormValue("pertalite_price")
 
-    var response = JsonResponse{}
+    var response = JsonResponseRetrieve{}
 
     if qty == "" || premium_price == "" || pertalite_price == "" {
-        response = JsonResponse{Type: "error", Message: "You are missing Qty or movieName parameter."}
+        response = JsonResponseRetrieve{Type: "error", Message: "You are missing Qty or premium_price or pertalite_price parameter."}
     } else {
         db := setupDB()
 
-        printMessage("Inserting movie into DB")
+        printMessage("Inserting fuel_price into DB")
 
-        fmt.Println("Inserting new movie with Qty: " + qty + " and premium_price: " + premium_price)
+        fmt.Println("Inserting new fuel_price with Qty: " + qty + " and premium_price: " + premium_price)
 
         var lastInsertID int
-    err := db.QueryRow("INSERT INTO fuel_prices(qty, premium_price, pertalite_price) VALUES($1, $2, $3) returning id;", qty, premium_price, pertalite_price).Scan(&lastInsertID)
+		err := db.QueryRow("INSERT INTO fuel_prices(qty, premium_price, pertalite_price) VALUES($1, $2, $3) returning id;", qty, premium_price, pertalite_price).Scan(&lastInsertID)
+		checkErr(err)
+		row := db.QueryRow("SELECT * FROM fuel_prices WHERE id=$1;", lastInsertID)
+		err_ := row.Scan(&lastInsertID, &qty, &premium_price,&pertalite_price)
+		checkErr(err_)
 
-    // check errors
-    checkErr(err)
+		// check errors
 
-    response = JsonResponse{Type: "success", Message: "The movie has been inserted successfully!"}
+		qty_int, _ := strconv.Atoi(qty)
+		premium_price_int, _ := strconv.Atoi(premium_price)
+		pertalite_price_int, _ := strconv.Atoi(pertalite_price)
+
+		fuelprice := FuelPrice{Id: lastInsertID, Qty: qty_int, PremiumPrice: premium_price_int, PertalitePrice: pertalite_price_int}
+
+		response = JsonResponseRetrieve{Type: "success", Message: "The full price has been inserted successfully!", Data: fuelprice}
     }
 
     json.NewEncoder(w).Encode(response)
@@ -204,19 +211,6 @@ func UpdateFuelPrice(w http.ResponseWriter, r *http.Request) {
 
         printMessage("Read a fuel price from DB")
 
-		// var id int
-		// var qty int
-		// var premium_price int
-		// var pertalite_price int
-
-		// row := db.QueryRow("SELECT * FROM fuel_prices WHERE id=$1;", fuelpriceid)
-		// err := row.Scan(&id, &qty, &premium_price,&pertalite_price)
-		// fmt.Println(id)
-		// fmt.Println(qty)
-		// fmt.Println(premium_price)
-		// fmt.Println(pertalite_price)
-
-
 		sqlStatement := `
 			UPDATE fuel_prices
 			SET qty = $2, premium_price = $3, pertalite_price=$4
@@ -253,14 +247,14 @@ func DeleteFuelPrice(w http.ResponseWriter, r *http.Request) {
     } else {
         db := setupDB()
 
-        printMessage("Deleting movie from DB")
+        printMessage("Deleting fuel price from DB")
 
         _, err := db.Exec("DELETE FROM fuel_prices where id = $1", fuelpriceid)
 
         // check errors
         checkErr(err)
 
-        response = JsonResponse{Type: "success", Message: "The movie has been deleted successfully!"}
+        response = JsonResponse{Type: "success", Message: "The fuel price has been deleted successfully!"}
     }
 
     json.NewEncoder(w).Encode(response)
