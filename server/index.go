@@ -50,24 +50,35 @@ type JsonResponseRetrieve struct {
 
 // Go main function
 func main() {
+    // mux := http.NewServeMux()
+    // mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    //     w.Header().Set("Content-Type", "application/json")
+    //     w.Write([]byte("{\"hello\": \"world\"}"))
+    // })
+
+    // // cors.Default() setup the middleware with default options being
+    // // all origins accepted with simple methods (GET, POST). See
+    // // documentation below for more options.
+    // handler := cors.Default().Handler(mux)
+    // http.ListenAndServe(":8080", handler)
 
     // Init the mux router
     router := mux.NewRouter()
 
     // Get all fuel prices
-    router.HandleFunc("/fuel_prices/", GetFuelPrices).Methods("GET")
+    router.HandleFunc("/fuel_prices/", GetFuelPrices).Methods("GET", "OPTIONS")
 
     // Create a FuelPrice
-    router.HandleFunc("/fuel_prices/", CreateFuelPrice).Methods("POST")
+    router.HandleFunc("/fuel_prices/", CreateFuelPrice).Methods("POST", "OPTIONS")
 
 	// Read a fuel price by id
-    router.HandleFunc("/fuel_prices/{fuelpriceid}/", ReadFuelPrice).Methods("GET")
+    router.HandleFunc("/fuel_prices/{fuelpriceid}/", ReadFuelPrice).Methods("GET", "OPTIONS")
 
 	// Update a fuel price by id
-    router.HandleFunc("/fuel_prices/{fuelpriceid}/", UpdateFuelPrice).Methods("PUT")
+    router.HandleFunc("/fuel_prices/{fuelpriceid}/", UpdateFuelPrice).Methods("PUT", "OPTIONS")
 
     // Delete a specific FuelPrice by the FuelPriceID
-    router.HandleFunc("/fuel_prices/{fuelpriceid}/", DeleteFuelPrice).Methods("DELETE")
+    router.HandleFunc("/fuel_prices/{fuelpriceid}/", DeleteFuelPrice).Methods("DELETE", "OPTIONS")
 
     // serve the app
     fmt.Println("Server at 8080")
@@ -90,6 +101,14 @@ func checkErr(err error) {
 func GetFuelPrices(w http.ResponseWriter, r *http.Request) {
     db := setupDB()
 	w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "*")
+    w.Header().Set("Access-Control-Allow-Headers", "*")
+
+    if r.Method == "OPTIONS" {
+        w.Write([]byte("allowed"))
+        return
+    }
 
     printMessage("Getting fuel prices...")
 
