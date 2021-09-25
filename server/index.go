@@ -141,21 +141,33 @@ func GetFuelPrices(w http.ResponseWriter, r *http.Request) {
 
 func CreateFuelPrice(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
-	
-	qty := r.FormValue("qty")
-    premium_price := r.FormValue("premium_price")
-    pertalite_price := r.FormValue("pertalite_price")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "*")
+    w.Header().Set("Access-Control-Allow-Headers", "*")
+
+    decoder := json.NewDecoder(r.Body)
+    var price FuelPrice
+    err := decoder.Decode(&price)
+    if err != nil {
+        panic(err)
+    }
+    log.Println(price)
+	qty := price.Qty
+    premium_price := price.PremiumPrice
+    pertalite_price := price.PertalitePrice
+
+    log.Println(qty)
+    log.Println(premium_price)
+    log.Println(pertalite_price)
 
     var response = JsonResponseRetrieve{}
 
-    if qty == "" || premium_price == "" || pertalite_price == "" {
+    if qty == 0 || premium_price == 0 || pertalite_price == 0 {
         response = JsonResponseRetrieve{Type: "error", Message: "You are missing Qty or premium_price or pertalite_price parameter."}
     } else {
         db := setupDB()
 
         printMessage("Inserting fuel_price into DB")
-
-        fmt.Println("Inserting new fuel_price with Qty: " + qty + " and premium_price: " + premium_price)
 
         var lastInsertID int
 		err := db.QueryRow("INSERT INTO fuel_prices(qty, premium_price, pertalite_price) VALUES($1, $2, $3) returning id;", qty, premium_price, pertalite_price).Scan(&lastInsertID)
@@ -164,13 +176,7 @@ func CreateFuelPrice(w http.ResponseWriter, r *http.Request) {
 		err_ := row.Scan(&lastInsertID, &qty, &premium_price,&pertalite_price)
 		checkErr(err_)
 
-		// check errors
-
-		qty_int, _ := strconv.Atoi(qty)
-		premium_price_int, _ := strconv.Atoi(premium_price)
-		pertalite_price_int, _ := strconv.Atoi(pertalite_price)
-
-		fuelprice := FuelPrice{Id: lastInsertID, Qty: qty_int, PremiumPrice: premium_price_int, PertalitePrice: pertalite_price_int}
+		fuelprice := FuelPrice{Id: lastInsertID, Qty: qty, PremiumPrice: premium_price, PertalitePrice: pertalite_price}
 
 		response = JsonResponseRetrieve{Type: "success", Message: "The full price has been inserted successfully!", Data: fuelprice}
     }

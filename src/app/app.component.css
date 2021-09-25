@@ -18,13 +18,6 @@ body {
   }
 }
 
-label {
-  font-size: 1.5rem;
-  font-weight: bold;
-  display: block;
-  padding-bottom: 1rem;
-}
-
 .lg-text-input {
   width: 100%;
   padding: 1rem;

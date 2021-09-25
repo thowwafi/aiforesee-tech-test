@@ -10,46 +10,46 @@ import { Price } from "./price";
     styleUrls: ["./app.component.css"],
 })
 export class AppComponent {
-    items = [{"1": "2"}];
+    items = [{ "1": "2" }];
     all_prices!: Price[];
-    resp:any;
+    price = new Price();
+    resp: any;
+    error: any;
     constructor(private priceService: PriceService) {}
     ngOnInit(): void {
-      this.priceService.fetchPrice().subscribe(
-        (res) => {
-          console.log(res)
-          this.resp = res;
-          this.all_prices = this.resp.data;
-        },
-        (err) => console.log(err),
-        () => console.log('done!')
-      );
+        this.refreshPrice();
     }
-    // title = 'todo';
 
-    // filter: 'all' | 'active' | 'done' = 'all';
-
-    // allItems = [
-    //   { description: 'eat', done: true },
-    //   { description: 'sleep', done: false },
-    //   { description: 'play', done: false },
-    //   { description: 'laugh', done: false },
-    // ];
-
-    // get items() {
-    //   if (this.filter === 'all') {
-    //     return this.allItems;
-    //   }
-    //   return this.allItems.filter((item) =>
-    //     this.filter === 'done' ? item.done : !item.done
-    //   );
-    // }
-    addItem(qty: number, premium_price: number, pertalite_price: number) {
-      console.log(qty)
-      console.log(premium_price)
-      console.log(pertalite_price)
+    refreshPrice() {
+        this.priceService.fetchPrice().subscribe((res) => {
+            console.log(res);
+            this.resp = res;
+            this.all_prices = this.resp.data;
+        });
     }
-    // remove(item: any) {
-    //   this.allItems.splice(this.allItems.indexOf(item), 1);
-    // }
+
+    addPrice() {
+        console.log("this.price", this.price);
+        this.priceService.addPrice(this.price).subscribe(
+            (data) => {
+                console.log(data);
+                if (data.type == "success") {
+                  this.refreshPrice();
+                  this.toggleModal();
+                } else {
+                  console.log("oops", data.message);
+                  this.error = data.message;
+                }
+            },
+            (error) => {
+                console.log("oops", error);
+                this.error = error;
+            }
+        );
+    }
+
+    showModal = false;
+    toggleModal() {
+        this.showModal = !this.showModal;
+    }
 }
