@@ -18,4 +18,9 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
     DB_NAME = "your_db_name"
     ```
 3. Run `generate_data.go` file
+    ```
+    cd server/database/
+    go run generate_initial_data.go
+    ```
+4. Run
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
