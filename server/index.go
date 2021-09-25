@@ -8,21 +8,24 @@ import (
 	"net/http"
 	"strconv"
     "sort"
+    "os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-)
+    "github.com/joho/godotenv"
 
-const (
-    DB_USER     = "alfi"
-    DB_PASSWORD = "1234567890"
-    DB_NAME     = "aiforesee_application"
 )
 
 // DB set up
 func setupDB() *sql.DB {
+    err := godotenv.Load("../.env")
+    var (
+        DB_USER     = os.Getenv("DB_USER")
+        DB_PASSWORD = os.Getenv("DB_PASSWORD")
+        DB_NAME     = os.Getenv("DB_NAME")
+    )
+    checkErr(err)
     dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
-	// dbURL := "postgres://iwggzgabufxdyc:b81c780e6921121c9d37cf23ef612ba2d276b81b7ae15de4019df264ab50dfa0@ec2-107-22-245-82.compute-1.amazonaws.com:5432/d7rc2qfknu4r74"
     db, err := sql.Open("postgres", dbinfo)
 
     checkErr(err)

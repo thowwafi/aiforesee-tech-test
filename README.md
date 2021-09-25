@@ -1,5 +1,12 @@
 # Fuelprices
-
+```
+CREATE TABLE fuel_prices (
+    id SERIAL PRIMARY KEY,
+    qty INT NOT NULL,
+    premium_price INT NOT NULL,
+    pertalite_price INT NOT NULL
+);
+```
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.7.
 
 ## Development server
