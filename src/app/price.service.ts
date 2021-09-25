@@ -7,8 +7,11 @@ import { Price } from "./price";
 export class PriceService {
     constructor(private http: HttpClient) {}
     baseURL: string = "http://127.0.0.1:8080/";
-    fetchPrice(): Observable<any> {
+    fetchPrices(): Observable<any> {
         return this.http.get(this.baseURL + "fuel_prices/")
+    }
+    showPrice(price_id: number): Observable<any> {
+        return this.http.get(`${this.baseURL}fuel_prices/${price_id}/`);
     }
     addPrice(price: Price): Observable<any> {
         const headers = { 'content-type': 'application/json'}  
@@ -16,10 +19,13 @@ export class PriceService {
         console.log("body", body)
         return this.http.post(this.baseURL + 'fuel_prices/', body, {'headers':headers})
     }
+    updatePrice(price: Price): Observable<any> {
+        const headers = { 'content-type': 'application/json'}  
+        const body = JSON.stringify(price);
+        console.log("body", body)
+        return this.http.put(`${this.baseURL}fuel_prices/${price.id}/`, body, {'headers':headers})
+    }
     deletePrice(price_id: number) {
-        // var id = price_id.toString()
-        // console.log("price_id", id)
-        // return this.http.delete(this.baseURL + "fuel_prices/" + id + "/")
         return this.http.delete(`${this.baseURL}fuel_prices/${price_id}/`);
     }
 }

@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+    "sort"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -133,6 +134,9 @@ func GetFuelPrices(w http.ResponseWriter, r *http.Request) {
 
         fuel_prices = append(fuel_prices, FuelPrice{Id: id, Qty: qty, PremiumPrice: premium_price, PertalitePrice: pertalite_price})
     }
+    sort.Slice(fuel_prices, func(i, j int) bool {
+        return fuel_prices[i].Id < fuel_prices[j].Id
+    })
 
     var response = JsonResponse{Type: "success", Data: fuel_prices}
 
@@ -223,12 +227,27 @@ func ReadFuelPrice(w http.ResponseWriter, r *http.Request) {
 
 func UpdateFuelPrice(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "*")
+    w.Header().Set("Access-Control-Allow-Headers", "*")
     params := mux.Vars(r)
+    printMessage("UPDATE")
 
     fuelpriceid := params["fuelpriceid"]
-	qty := r.FormValue("qty")
-    premium_price := r.FormValue("premium_price")
-    pertalite_price := r.FormValue("pertalite_price")
+	decoder := json.NewDecoder(r.Body)
+    var price FuelPrice
+    err := decoder.Decode(&price)
+    if err != nil {
+        panic(err)
+    }
+    log.Println(price)
+	qty := price.Qty
+    premium_price := price.PremiumPrice
+    pertalite_price := price.PertalitePrice
+
+    log.Println(qty)
+    log.Println(premium_price)
+    log.Println(pertalite_price)
 
     var response = JsonResponseRetrieve{}
 
@@ -237,7 +256,7 @@ func UpdateFuelPrice(w http.ResponseWriter, r *http.Request) {
     } else {
         db := setupDB()
 
-        printMessage("Read a fuel price from DB")
+        printMessage("UPDATE a fuel price from DB")
 
 		sqlStatement := `
 			UPDATE fuel_prices
@@ -248,11 +267,8 @@ func UpdateFuelPrice(w http.ResponseWriter, r *http.Request) {
 		checkErr(err)
 
 		fuelpriceid_int, _ := strconv.Atoi(fuelpriceid)
-		qty_int, _ := strconv.Atoi(qty)
-		premium_price_int, _ := strconv.Atoi(premium_price)
-		pertalite_price_int, _ := strconv.Atoi(pertalite_price)
 
-		fuelprice := FuelPrice{Id: fuelpriceid_int, Qty: qty_int, PremiumPrice: premium_price_int, PertalitePrice: pertalite_price_int}
+		fuelprice := FuelPrice{Id: fuelpriceid_int, Qty: qty, PremiumPrice: premium_price, PertalitePrice: pertalite_price}
 
         checkErr(err)
 
