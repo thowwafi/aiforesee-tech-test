@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { Price } from "./price";
 
@@ -15,5 +15,11 @@ export class PriceService {
         const body = JSON.stringify(price);
         console.log("body", body)
         return this.http.post(this.baseURL + 'fuel_prices/', body, {'headers':headers})
+    }
+    deletePrice(price_id: number) {
+        // var id = price_id.toString()
+        // console.log("price_id", id)
+        // return this.http.delete(this.baseURL + "fuel_prices/" + id + "/")
+        return this.http.delete(`${this.baseURL}fuel_prices/${price_id}/`);
     }
 }

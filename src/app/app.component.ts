@@ -48,8 +48,28 @@ export class AppComponent {
         );
     }
 
+    showPrice() {
+        this.priceService.fetchPrice().subscribe((res) => {
+            console.log(res);
+            this.resp = res;
+            this.all_prices = this.resp.data;
+        });
+    }
+
+    deletePrice(price_id: number) {
+        console.log(price_id);
+        this.priceService.deletePrice(price_id)
+            .subscribe(
+                result => {
+                    console.log(result)
+                    this.refreshPrice();
+                },
+                err => console.error(err)
+            );
+    }
+
     showModal = false;
-    toggleModal() {
+    toggleModal(price_id: string = 'hello') {
         this.showModal = !this.showModal;
     }
 }

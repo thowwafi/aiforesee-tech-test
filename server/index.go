@@ -187,6 +187,9 @@ func CreateFuelPrice(w http.ResponseWriter, r *http.Request) {
 
 func ReadFuelPrice(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "*")
+    w.Header().Set("Access-Control-Allow-Headers", "*")
     params := mux.Vars(r)
 
     fuelpriceid := params["fuelpriceid"]
@@ -261,11 +264,16 @@ func UpdateFuelPrice(w http.ResponseWriter, r *http.Request) {
 
 
 func DeleteFuelPrice(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "*")
+    w.Header().Set("Access-Control-Allow-Headers", "*")
     params := mux.Vars(r)
 
     fuelpriceid := params["fuelpriceid"]
 
     var response = JsonResponse{}
+    printMessage("Deleting fuel price from DB")
 
     if fuelpriceid == "" {
         response = JsonResponse{Type: "error", Message: "You are missing fuelpriceid parameter."}
