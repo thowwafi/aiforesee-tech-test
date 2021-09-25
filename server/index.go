@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"sort"
 	"strconv"
-    "sort"
-    "os"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-    "github.com/joho/godotenv"
-
 )
 
 // DB set up

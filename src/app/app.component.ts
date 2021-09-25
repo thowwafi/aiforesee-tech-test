@@ -1,7 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { Observable } from "rxjs";
 import { PriceService } from "./price.service";
-import { HttpClient } from "@angular/common/http";
 import { Price } from "./price";
 
 @Component({
@@ -14,7 +12,7 @@ export class AppComponent {
     all_prices!: Price[];
     price = new Price();
     resp: any;
-    error: any;
+    error!: string;
     update = false
     constructor(private priceService: PriceService) {}
     ngOnInit(): void {
@@ -48,7 +46,7 @@ export class AppComponent {
             },
             (error) => {
                 console.log("oops", error);
-                this.error = error;
+                this.error = error.message;
             }
         );
     }
@@ -80,7 +78,7 @@ export class AppComponent {
             },
             (error) => {
                 console.log("oops2", error);
-                this.error = error;
+                this.error = error.message;
             }
         );
     }
@@ -103,6 +101,7 @@ export class AppComponent {
             this.price = new Price();
             this.update = false
         }
+        this.error = ""
         this.showModal = !this.showModal;
     }
 }
