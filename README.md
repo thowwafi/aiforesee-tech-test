@@ -17,7 +17,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
     DB_PASSWORD = "your_password"
     DB_NAME = "your_db_name"
     ```
-3. Run `generate_data.go` file
+3. Run `generate_initial_data.go` file
     ```
     cd server/database/
     go run generate_initial_data.go
